@@ -4,9 +4,11 @@ from flask import Flask, render_template, session, request, \
 from flask_socketio import SocketIO, emit, join_room, leave_room, \
     close_room, rooms, disconnect
 from pymongo import MongoClient
-import time,json
+import time,json,os
+from dotenv import load_dotenv
 
-client = MongoClient('')
+load_dotenv()
+client = MongoClient(os.getenv('MONGO_URI'))
 mydb = client['share']
 myset = mydb['clips']
 counter_set = mydb['counters']
@@ -74,6 +76,10 @@ def index():
 @app.route('/chat')
 def chat():
     return render_template('chat.html', async_mode=socketio.async_mode)
+
+@app.route('/high')
+def high():
+    return render_template('high.html', async_mode=socketio.async_mode)
 
 
 @socketio.on('connect')
