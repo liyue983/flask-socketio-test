@@ -21,13 +21,13 @@ socketio = SocketIO(app, async_mode=async_mode)
 def getNextSequence(seq_name='clipseq'):
     query = {'_id':seq_name}
     update = {'$inc':{'seq_num':1}}
-    counter_set.update(query,update)
+    counter_set.update_one(query,update)
     sequenceDocument = counter_set.find_one(query)
     print(sequenceDocument)
     return sequenceDocument['seq_num']
 
 # @app.route('/add',methods=['POST','GET'])
-def insertOneMsg(Msg=None,User='UNDEFINED'):
+def insertOneMsg(Msg=None,User='UNDEFINED',Time=None):
     if request.method == 'POST':
         Msg = request.form.get('msg')
         User = request.form.get('user','Undefined')
@@ -39,9 +39,9 @@ def insertOneMsg(Msg=None,User='UNDEFINED'):
         'seq':getNextSequence('clipseq'),
         'user':User,
         'msg':Msg,
-        'time':time.time()
+        'time':Time if Time else time.time()
     }
-    result = myset.insert(schema)
+    result = myset.insert_one(schema)
     return str(schema)
 
 def getMsgBetweenTime(time_min,time_max,asc=1):
@@ -79,7 +79,7 @@ def chat():
 @socketio.on('connect')
 def connect():
     print('connect!')
-    emit('my_response', {'data': {'msg':'Connected','user':'server','time':time.time()}, 'count': 0})
+    emit('my_response', {'data': {'msg':'Connected','user':'SERVER','time':time.time()}, 'count': 0})
 
 @socketio.on('disconnect')
 def test_disconnect():
@@ -91,8 +91,8 @@ def my_event(message):
 
 @socketio.on('my_broadcast_event')
 def my_broadcast_event(message):
-    insertOneMsg(message['data']['msg'],message['data']['user'])
     message['data']['time'] = time.time()
+    insertOneMsg(message['data']['msg'],message['data']['user'],message['data']['time'])
     emit('my_response',
          {'data': message['data'], 'count': 0},
          broadcast=True)
