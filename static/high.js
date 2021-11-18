@@ -6,6 +6,7 @@ const userList = document.getElementById("users");
 // Get username and room from URL
 const username = getPlatformName();
 const room = getBrowserName();
+var messageList = [];
 
 $.get("/latest/15", function (data) {
   try {
@@ -18,7 +19,28 @@ $.get("/latest/15", function (data) {
   }
 });
 $(".chat-messages").click(function (e) {
-  if (e.target.className.indexOf("fa") != -1) {
+  //addmore button
+  if (e.target.className.indexOf("fa-plus-circle") != -1) {
+    // console.log("more");
+    e.target.classList.remove("fa-plus-circle");
+    e.target.classList.add("fa-spinner");
+    e.target.classList.add("fa-spin");
+    $.get("/latest/5", function (data) {
+      try {
+        data["data"].forEach((element) => {
+          outputMessage(element, (fromAddmore = true));
+        });
+      } catch (error) {
+        console.log(error);
+      }
+      e.target.classList.remove("fa-spinner");
+      e.target.classList.remove("fa-spin");
+      e.target.classList.add("fa-plus-circle");
+    });
+  }
+
+  //copy button
+  if (e.target.className.indexOf("fa-clone") != -1) {
     var ptext = e.target.getAttribute("ptext");
     console.log(ptext);
     e.target.classList.remove("fa-clone");
@@ -44,7 +66,6 @@ $(".chat-messages").click(function (e) {
       }, 200);
     }
     document.body.removeChild(input);
-    // m.focus();
   }
 });
 const socket = io();
@@ -102,7 +123,7 @@ chatForm.addEventListener("submit", (e) => {
 });
 
 // Output message to DOM
-function outputMessage(message) {
+function outputMessage(message, fromAddmore = false) {
   const div = document.createElement("div");
   div.classList.add("message");
 
@@ -132,7 +153,11 @@ function outputMessage(message) {
   i.setAttribute("ptext", message.msg);
   copyme.appendChild(i);
   div.appendChild(copyme);
-  document.querySelector(".chat-messages").appendChild(div);
+  if (fromAddmore) {
+    $(".more-msg").after(div);
+  } else {
+    document.querySelector(".chat-messages").appendChild(div);
+  }
 }
 
 // Add room name to DOM

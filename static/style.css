@@ -42,7 +42,15 @@ a {
   text-align: end;
   font-size: small;
 }
-.copyme i:hover {
+.addmore {
+  color: var(--dark-color-a);
+  text-align: center;
+  font-size: xx-large;
+}
+.addmore i.fa-plus-circle:hover {
+  cursor: pointer;
+}
+.copyme i.fa-clone:hover {
   cursor: pointer;
 }
 
