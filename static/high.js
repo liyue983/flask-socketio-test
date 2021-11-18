@@ -105,10 +105,11 @@ socket.on("message", (message) => {
 });
 
 socket.on("my_response", function (message, cb) {
+  const flag = chatMessages.scrollHeight - chatMessages.scrollTop < 1000;
   outputMessage(message["data"]);
   console.log(message["data"]);
   if (cb) cb();
-  if (chatMessages.scrollHeight - chatMessages.scrollTop < 1000) {
+  if (flag) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 });
@@ -148,7 +149,7 @@ function outputMessage(message, fromAddmore = false) {
   const p0 = document.createElement("p");
   p0.classList.add("meta");
   p0.innerHTML += `<span>${new Date(parseInt(message.time * 1000)).format(
-    "yyyy.MM.dd hh:mm:ss"
+    "yyyy-MM-dd hh:mm:ss"
   )}</span>`;
   div.appendChild(p0);
 
