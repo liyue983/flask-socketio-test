@@ -44,7 +44,7 @@ def insertOneMsg(Msg=None,User='UNDEFINED',Time=None):
         'time':Time if Time else time.time()
     }
     result = myset.insert_one(schema)
-    return str(schema)
+    return schema
 
 def getMsgBetweenTime(time_min,time_max,asc=1):
     schema = {
@@ -60,13 +60,25 @@ def getMsgBetweenSeq(seq_min,seq_max,asc=1):
     result = myset.find(schema,{'_id':0}).sort('seq',asc)
     return list(result)
 
+@app.route('/before/<int:seq_max>')
+def getMsgBeforeSeq(seq_max,num=2):
+    num = int(request.args.get('num')) if request.args.get('num') else num
+    schema = {
+        "seq":{"$lte":seq_max}
+    }
+    result = myset.find(schema,{'_id':0}).sort('seq',-1).limit(num)
+    return ({'data':list(result)})
+
 @app.route('/latest')
 @app.route('/latest/<int:num>')
 def getLatestMsg(num=1,asc=1):
     latest_seq = counter_set.find_one({"_id":"clipseq"})['seq_num']
-    seq_min = latest_seq-num+1
-    asc = int(request.args.get('asc',asc))
-    return ({'data':getMsgBetweenSeq(seq_min,latest_seq,asc),'l':'你好'})
+    schema = {
+        "seq":{"$lte":latest_seq}
+    }
+    result = list(myset.find(schema,{'_id':0}).sort('seq',-1).limit(num))
+    result.sort(key=lambda x:x['seq'])
+    return ({'data':result})
 
 @app.route('/index.html')
 @app.route('/')
@@ -97,10 +109,10 @@ def my_event(message):
 
 @socketio.on('my_broadcast_event')
 def my_broadcast_event(message):
-    message['data']['time'] = time.time()
-    insertOneMsg(message['data']['msg'],message['data']['user'],message['data']['time'])
+    result = insertOneMsg(message['data']['msg'],message['data']['user'])
+    result.pop('_id')
     emit('my_response',
-         {'data': message['data'], 'count': 0},
+         {'data': result}, 
          broadcast=True)
 
 

@@ -11,9 +11,14 @@ var messageList = [];
 $.get("/latest/15", function (data) {
   try {
     // alert(data);
+    data["data"].sort((a, b) => {
+      return a["seq"] - b["seq"];
+    });
     data["data"].forEach((element) => {
       outputMessage(element);
+      messageList.push(element);
     });
+    chatMessages.scrollTop = chatMessages.scrollHeight;
   } catch (error) {
     console.log(error);
   }
@@ -25,18 +30,29 @@ $(".chat-messages").click(function (e) {
     e.target.classList.remove("fa-plus-circle");
     e.target.classList.add("fa-spinner");
     e.target.classList.add("fa-spin");
-    $.get("/latest/5", function (data) {
-      try {
-        data["data"].forEach((element) => {
-          outputMessage(element, (fromAddmore = true));
-        });
-      } catch (error) {
-        console.log(error);
+    $.get(
+      "/before/" + (messageList[0]["seq"] - 1) + "?num=10",
+      function (data) {
+        const cur_scroll_top = chatMessages.scrollTop;
+        const cur_scroll_height = chatMessages.scrollHeight;
+        try {
+          data["data"].sort((a, b) => {
+            return b["seq"] - a["seq"];
+          });
+          data["data"].forEach((element) => {
+            outputMessage(element, (fromAddmore = true));
+            messageList.unshift(element);
+          });
+        } catch (error) {
+          console.log(error);
+        }
+        chatMessages.scrollTop =
+          chatMessages.scrollHeight - cur_scroll_height + cur_scroll_top;
+        e.target.classList.remove("fa-spinner");
+        e.target.classList.remove("fa-spin");
+        e.target.classList.add("fa-plus-circle");
       }
-      e.target.classList.remove("fa-spinner");
-      e.target.classList.remove("fa-spin");
-      e.target.classList.add("fa-plus-circle");
-    });
+    );
   }
 
   //copy button
@@ -92,7 +108,9 @@ socket.on("my_response", function (message, cb) {
   outputMessage(message["data"]);
   console.log(message["data"]);
   if (cb) cb();
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+  if (chatMessages.scrollHeight - chatMessages.scrollTop < 1000) {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
 });
 
 // Message submit
