@@ -4,7 +4,7 @@ from flask import Flask, render_template, session, request, \
 from flask_socketio import SocketIO, emit, join_room, leave_room, \
     close_room, rooms, disconnect
 from pymongo import MongoClient
-import time,json,os
+import time,json,os,random
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -30,9 +30,9 @@ def getNextSequence(seq_name='clipseq'):
 
 # @app.route('/add',methods=['POST','GET'])
 def insertOneMsg(Msg=None,User='UNDEFINED',Time=None):
-    if request.method == 'POST':
-        Msg = request.form.get('msg')
-        User = request.form.get('user','Undefined')
+    # if request.method == 'POST':
+        # Msg = request.form.get('msg')
+        # User = request.form.get('user','Undefined')
     # elif request.method == 'GET':
     #     Msg = request.args.get('msg',None)
     if not Msg:
@@ -99,6 +99,15 @@ def get_file_length(file):
     file.seek(0, 0)
     return file_length
 
+def do_something_with_file(file):
+    filename=hex(random.randint(16**3,16**4))[2:]+hex(int(time.time()*1000))[2:]+'-'+file.filename
+    file.save(os.path.join(app.config.get('UPLOAD_FOLDER'), filename))
+    result = insertOneMsg(Msg='@file:'+filename,User='todo')
+    print(result)
+    result.pop('_id')
+    socketio.emit("my_response",{'data':result})
+    return True
+
 @app.route('/upload',methods=["POST"])
 def upload_file():
     if request.method == 'POST':
@@ -112,7 +121,8 @@ def upload_file():
                 continue
             filename = (file.filename)
             print(filename)
-            file.save(os.path.join(app.config.get('UPLOAD_FOLDER'), filename))
+            do_something_with_file(file)
+            # file.save(os.path.join(app.config.get('UPLOAD_FOLDER'), filename))
         return {'data':"ok"}
     return render_template('upload.html', msg='请上传')
 
