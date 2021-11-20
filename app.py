@@ -1,6 +1,6 @@
 from logging import debug
 from flask import Flask, render_template, session, request, \
-    copy_current_request_context
+    copy_current_request_context,send_from_directory
 from flask_socketio import SocketIO, emit, join_room, leave_room, \
     close_room, rooms, disconnect
 from pymongo import MongoClient
@@ -107,6 +107,10 @@ def do_something_with_file(file):
     result.pop('_id')
     socketio.emit("my_response",{'data':result})
     return True
+
+@app.route('/download/<filename>')
+def download_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'],filename,as_attachment=True)
 
 @app.route('/upload',methods=["POST"])
 def upload_file():
