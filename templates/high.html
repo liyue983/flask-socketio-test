@@ -52,6 +52,15 @@
         </div>
       </main>
       <div class="chat-form-container">
+        <form
+          action="/upload"
+          method="post"
+          enctype="multipart/form-data"
+          id="uploadform"
+        >
+          <input type="file" name="file" id="file" multiple="multiple" />
+          <input type="button" value="上传" id="up" />
+        </form>
         <form id="chat-form">
           <textarea
             id="msg"

@@ -2,6 +2,8 @@ const chatForm = document.getElementById("chat-form");
 const chatMessages = document.querySelector(".chat-messages");
 const roomName = document.getElementById("room-name");
 const userList = document.getElementById("users");
+const uploadFile = document.getElementById("file");
+const uploadForm = document.getElementById("uploadform");
 
 // Get username and room from URL
 const username = getPlatformName();
@@ -84,6 +86,22 @@ $(".chat-messages").click(function (e) {
     document.body.removeChild(input);
   }
 });
+// $("#file").on("change", () => {
+//   // alert("up");
+//   file_list = uploadFile.files;
+//   outputMessage({
+//     user: "log",
+//     msg:
+//       file_list.length +
+//       " file" +
+//       (file_list.length == 1 ? "" : "s") +
+//       " will be uploaded.",
+//     time: 100000000000,
+//   });
+//   for (var i = 0; i < file_list.length; i++) {
+//     uploadForm.innerHTML += file_list[i].name + ";";
+//   }
+// });
 const socket = io();
 
 // Join chatroom
@@ -117,30 +135,60 @@ socket.on("my_response", function (message, cb) {
 // Message submit
 chatForm.addEventListener("submit", (e) => {
   e.preventDefault();
-
-  // Get message text
+  if (uploadFile.files.length != 0) {
+    upLoadFiles([]);
+    upLoadFile.value = "";
+  }
   let msg = e.target.elements.msg.value;
-
-  //   msg = msg.trim();
-  // console.log(msg);
-
   if (!msg) {
     return false;
   }
-
-  // Emit message to server
   socket.emit("my_broadcast_event", {
     data: {
       msg: msg,
       user: getPlatformName() + "-" + getBrowserName(),
     },
   });
-
-  // Clear input
   e.target.elements.msg.value = "";
   e.target.elements.msg.focus();
 });
-
+$("#up").click(() => {
+  formData = new FormData(uploadForm);
+  // formData.append('file',$('#file')[0].files[0]);
+  console.log(formData);
+  $.ajax({
+    url: "/upload",
+    type: "post",
+    data: formData,
+    processData: false,
+    contentType: false,
+    success: (res) => {
+      console.log(res);
+    },
+    error: (e) => {
+      console.log(e);
+    },
+  });
+});
+function upLoadFiles(file_list) {
+  const formData = new FormData(uploadForm);
+  // const formData = new FormData();
+  // formData.append("file", $("#file")[0].files[0]);
+  console.log(formData);
+  $.ajax({
+    url: "/upload",
+    type: "post",
+    data: formData,
+    processData: false,
+    contentType: false,
+    success: (res) => {
+      console.log(res);
+    },
+    error: (e) => {
+      console.log(e);
+    },
+  });
+}
 // Output message to DOM
 function outputMessage(message, fromAddmore = false) {
   const div = document.createElement("div");

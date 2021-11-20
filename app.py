@@ -17,7 +17,7 @@ counter_set = mydb['counters']
 async_mode = None
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'
+app.config.from_object('config')
 socketio = SocketIO(app, async_mode=async_mode)
 
 def getNextSequence(seq_name='clipseq'):
@@ -25,7 +25,7 @@ def getNextSequence(seq_name='clipseq'):
     update = {'$inc':{'seq_num':1}}
     counter_set.update_one(query,update)
     sequenceDocument = counter_set.find_one(query)
-    print(sequenceDocument)
+    # print(sequenceDocument)
     return sequenceDocument['seq_num']
 
 # @app.route('/add',methods=['POST','GET'])
@@ -93,10 +93,32 @@ def chat():
 def high():
     return render_template('high.html', async_mode=socketio.async_mode)
 
+def get_file_length(file):
+    file.seek(0, 2)
+    file_length = file.tell()
+    file.seek(0, 0)
+    return file_length
+
+@app.route('/upload',methods=["POST"])
+def upload_file():
+    if request.method == 'POST':
+        files = request.files.getlist('file')
+        # print(len(files))
+        if len(files) == 0:
+            return {"msg": '失败'}
+        for file in files:
+            print(get_file_length(file))
+            if get_file_length(file) == 0:
+                continue
+            filename = (file.filename)
+            print(filename)
+            file.save(os.path.join(app.config.get('UPLOAD_FOLDER'), filename))
+        return {'data':"ok"}
+    return render_template('upload.html', msg='请上传')
 
 @socketio.on('connect')
 def connect():
-    print('connect!')
+    print('connect!',request.sid)
     emit('my_response', {'data': {'msg':'Connected','user':'SERVER','time':time.time()}, 'count': 0})
 
 @socketio.on('disconnect')
@@ -110,6 +132,7 @@ def my_event(message):
 @socketio.on('my_broadcast_event')
 def my_broadcast_event(message):
     result = insertOneMsg(message['data']['msg'],message['data']['user'])
+    print(result)
     result.pop('_id')
     emit('my_response',
          {'data': result}, 
@@ -117,5 +140,5 @@ def my_broadcast_event(message):
 
 
 if __name__ == '__main__':
-    socketio.run(app,debug=True,host='0.0.0.0',port=5050)
+    socketio.run(app,host='0.0.0.0',port=5050)
 
