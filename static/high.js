@@ -148,7 +148,6 @@ chatForm.addEventListener("submit", (e) => {
   e.preventDefault();
   if (uploadFile.files.length != 0) {
     upLoadFiles([]);
-    $("#file").val("");
   }
   let msg = e.target.elements.msg.value;
   if (!msg) {
@@ -165,7 +164,9 @@ chatForm.addEventListener("submit", (e) => {
 });
 $("#up").click((e) => {
   e.preventDefault()
-  upLoadFiles([]);
+  if (uploadFile.files.length != 0) {
+    upLoadFiles([]);
+  }
 });
 function upLoadFiles(file_list) {
   const formData = new FormData(uploadForm);
