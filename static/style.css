@@ -42,6 +42,11 @@ a {
   text-align: end;
   font-size: small;
 }
+.downloadme {
+  color: var(--dark-color-a);
+  text-align: end;
+  font-size: small;
+}
 .addmore {
   color: var(--dark-color-a);
   text-align: center;

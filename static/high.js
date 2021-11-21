@@ -137,7 +137,7 @@ chatForm.addEventListener("submit", (e) => {
   e.preventDefault();
   if (uploadFile.files.length != 0) {
     upLoadFiles([]);
-    upLoadFile.value = "";
+    $("#file").val("");
   }
   let msg = e.target.elements.msg.value;
   if (!msg) {
@@ -153,22 +153,7 @@ chatForm.addEventListener("submit", (e) => {
   e.target.elements.msg.focus();
 });
 $("#up").click(() => {
-  formData = new FormData(uploadForm);
-  // formData.append('file',$('#file')[0].files[0]);
-  console.log(formData);
-  $.ajax({
-    url: "/upload",
-    type: "post",
-    data: formData,
-    processData: false,
-    contentType: false,
-    success: (res) => {
-      console.log(res);
-    },
-    error: (e) => {
-      console.log(e);
-    },
-  });
+  upLoadFiles([]);
 });
 function upLoadFiles(file_list) {
   const formData = new FormData(uploadForm);
@@ -183,6 +168,7 @@ function upLoadFiles(file_list) {
     contentType: false,
     success: (res) => {
       console.log(res);
+      $("#file").val("");
     },
     error: (e) => {
       console.log(e);
@@ -211,15 +197,24 @@ function outputMessage(message, fromAddmore = false) {
   para.innerHTML = "<code>" + htmlEncode(message.msg) + "</code>";
   hljs.highlightElement(para.childNodes[0]);
   div.appendChild(para);
-
-  const copyme = document.createElement("div");
-  copyme.classList.add("copyme");
-  const i = document.createElement("i");
-  i.classList.add("fas");
-  i.classList.add("fa-clone");
-  i.setAttribute("ptext", message.msg);
-  copyme.appendChild(i);
-  div.appendChild(copyme);
+  if (message.msg.indexOf("@file:") == 0) {
+    const dowloadme = document.createElement("div");
+    dowloadme.classList.add("downloadme");
+    const h = document.createElement("a");
+    h.setAttribute("href", "/download/" + message.msg.substr(6));
+    h.innerHTML = '<i class="fas fa-download"></i>';
+    dowloadme.appendChild(h);
+    div.appendChild(dowloadme);
+  } else {
+    const copyme = document.createElement("div");
+    copyme.classList.add("copyme");
+    const i = document.createElement("i");
+    i.classList.add("fas");
+    i.classList.add("fa-clone");
+    i.setAttribute("ptext", message.msg);
+    copyme.appendChild(i);
+    div.appendChild(copyme);
+  }
   if (fromAddmore) {
     $(".more-msg").after(div);
   } else {
