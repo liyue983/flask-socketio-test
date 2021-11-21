@@ -139,12 +139,13 @@ a {
 }
 
 .chat-form-container {
-  padding: 20px 30px;
+  padding: 10px 20px;
   background-color: var(--dark-color-a);
 }
 
 .chat-form-container form {
   display: flex;
+  justify-content: center;
 }
 
 .chat-form-container input[type="text"] {

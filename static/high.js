@@ -163,7 +163,8 @@ chatForm.addEventListener("submit", (e) => {
   e.target.elements.msg.value = "";
   e.target.elements.msg.focus();
 });
-$("#up").click(() => {
+$("#up").click((e) => {
+  e.preventDefault()
   upLoadFiles([]);
 });
 function upLoadFiles(file_list) {
