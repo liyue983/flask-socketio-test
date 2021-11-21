@@ -4,6 +4,7 @@ const roomName = document.getElementById("room-name");
 const userList = document.getElementById("users");
 const uploadFile = document.getElementById("file");
 const uploadForm = document.getElementById("uploadform");
+const addIcon = document.querySelector("#addicon");
 
 // Get username and room from URL
 const username = getPlatformName() + "-" + getBrowserName();
@@ -24,6 +25,16 @@ $.get("/latest/15", function (data) {
   } catch (error) {
     console.log(error);
   }
+});
+var last_top = 0;
+var new_top = 0;
+chatMessages.addEventListener("scroll",()=>{
+  new_top = chatMessages.scrollTop;
+  if(new_top<50&&last_top>50&&addIcon.className.indexOf("fa-plus-circle")!=-1){
+    console.log('trig')
+    addIcon.click()
+  }
+  last_top=new_top;
 });
 $(".chat-messages").click(function (e) {
   //addmore button
