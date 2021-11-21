@@ -197,7 +197,7 @@ function outputMessage(message, fromAddmore = false) {
   para.innerHTML = "<code>" + htmlEncode(message.msg) + "</code>";
   hljs.highlightElement(para.childNodes[0]);
   div.appendChild(para);
-  if (message.msg.indexOf("@file:") == 0) {
+  if (message.isFile) {
     const dowloadme = document.createElement("div");
     dowloadme.classList.add("downloadme");
     const h = document.createElement("a");

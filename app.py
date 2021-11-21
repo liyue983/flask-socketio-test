@@ -29,7 +29,7 @@ def getNextSequence(seq_name='clipseq'):
     return sequenceDocument['seq_num']
 
 # @app.route('/add',methods=['POST','GET'])
-def insertOneMsg(Msg=None,User='UNDEFINED',Time=None):
+def insertOneMsg(Msg=None,User='UNDEFINED',Time=None,isFile=False):
     # if request.method == 'POST':
         # Msg = request.form.get('msg')
         # User = request.form.get('user','Undefined')
@@ -41,6 +41,7 @@ def insertOneMsg(Msg=None,User='UNDEFINED',Time=None):
         'seq':getNextSequence('clipseq'),
         'user':User,
         'msg':Msg,
+        'isFile':isFile,
         'time':Time if Time else time.time()
     }
     result = myset.insert_one(schema)
@@ -102,7 +103,7 @@ def get_file_length(file):
 def do_something_with_file(file,user="Undefined"):
     filename=hex(random.randint(16**3,16**4))[2:]+hex(int(time.time()*1000))[2:]+'-'+file.filename
     file.save(os.path.join(app.config.get('UPLOAD_FOLDER'), filename))
-    result = insertOneMsg(Msg='@file:'+filename,User=user)
+    result = insertOneMsg(Msg='@file:'+filename,User=user,isFile=True)
     print(result)
     result.pop('_id')
     socketio.emit("my_response",{'data':result})
