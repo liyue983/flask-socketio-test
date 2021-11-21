@@ -6,7 +6,7 @@ const uploadFile = document.getElementById("file");
 const uploadForm = document.getElementById("uploadform");
 
 // Get username and room from URL
-const username = getPlatformName();
+const username = getPlatformName() + "-" + getBrowserName();
 const room = getBrowserName();
 var messageList = [];
 
@@ -158,7 +158,7 @@ $("#up").click(() => {
 function upLoadFiles(file_list) {
   const formData = new FormData(uploadForm);
   // const formData = new FormData();
-  // formData.append("file", $("#file")[0].files[0]);
+  formData.append("user", username);
   console.log(formData);
   $.ajax({
     url: "/upload",
@@ -202,6 +202,7 @@ function outputMessage(message, fromAddmore = false) {
     dowloadme.classList.add("downloadme");
     const h = document.createElement("a");
     h.setAttribute("href", "/download/" + message.msg.substr(6));
+    // h.setAttribute("target", "_blank");
     h.innerHTML = '<i class="fas fa-download"></i>';
     dowloadme.appendChild(h);
     div.appendChild(dowloadme);

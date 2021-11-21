@@ -99,10 +99,10 @@ def get_file_length(file):
     file.seek(0, 0)
     return file_length
 
-def do_something_with_file(file):
+def do_something_with_file(file,user="Undefined"):
     filename=hex(random.randint(16**3,16**4))[2:]+hex(int(time.time()*1000))[2:]+'-'+file.filename
     file.save(os.path.join(app.config.get('UPLOAD_FOLDER'), filename))
-    result = insertOneMsg(Msg='@file:'+filename,User='todo')
+    result = insertOneMsg(Msg='@file:'+filename,User=user)
     print(result)
     result.pop('_id')
     socketio.emit("my_response",{'data':result})
@@ -116,6 +116,7 @@ def download_file(filename):
 def upload_file():
     if request.method == 'POST':
         files = request.files.getlist('file')
+        user = request.form.get("user")
         # print(len(files))
         if len(files) == 0:
             return {"msg": '失败'}
@@ -125,7 +126,7 @@ def upload_file():
                 continue
             filename = (file.filename)
             print(filename)
-            do_something_with_file(file)
+            do_something_with_file(file,user)
             # file.save(os.path.join(app.config.get('UPLOAD_FOLDER'), filename))
         return {'data':"ok"}
     return render_template('upload.html', msg='请上传')
