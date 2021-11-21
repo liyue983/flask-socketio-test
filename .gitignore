@@ -1,2 +1,4 @@
 .env
 uploads/
+app.log
+config.py
