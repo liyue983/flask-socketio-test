@@ -100,7 +100,7 @@ def getLatestMsg(num=1, asc=1):
 @app.route('/index.html')
 @app.route('/')
 def index():
-    return render_template('index.html', async_mode=socketio.async_mode)
+    return render_template('high.html', async_mode=socketio.async_mode)
 
 
 @app.route('/chat')
@@ -169,6 +169,13 @@ def before_req():
         return redirect(url_for('login'))
     except:
         return redirect(url_for('login'))
+
+
+@app.route('/logout')
+def logout():
+    resp = make_response(redirect(url_for('index')))
+    resp.set_cookie('userInf', '')
+    return resp
 
 
 @app.route('/login', methods=["GET", "POST"])
