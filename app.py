@@ -1,6 +1,6 @@
 from logging import debug
 from flask import Flask, render_template, session, request, \
-    copy_current_request_context, send_from_directory
+    copy_current_request_context, send_from_directory, redirect, url_for, make_response
 from flask_socketio import SocketIO, emit, join_room, leave_room, \
     close_room, rooms, disconnect
 from pymongo import MongoClient
@@ -8,6 +8,7 @@ import time
 import json
 import os
 import random
+import AES_Util
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,6 +22,10 @@ async_mode = None
 
 app = Flask(__name__)
 app.config.from_object('config')
+app.config['PUBLIC_PATH'] = [
+    '/static/global.css', '/static/login.css', '/login']
+app.config['LOGIN_KEY'] = os.environ.get("LOGIN_KEY", "")
+AES_INS = AES_Util.AESUtil(os.environ.get("COOKIE_SKEY", ""))
 socketio = SocketIO(app, async_mode=async_mode)
 
 
@@ -149,6 +154,45 @@ def upload_file():
             # file.save(os.path.join(app.config.get('UPLOAD_FOLDER'), filename))
         return {'data': "ok"}
     return render_template('upload.html', msg='请上传')
+
+
+@app.before_request
+def before_req():
+    if request.path in app.config['PUBLIC_PATH']:
+        return
+    try:
+        userInf = request.cookies.get("userInf")
+        userInf = json.loads(AES_INS.aesDecrypt(userInf))
+        username = userInf['username']
+        if username == app.config['LOGIN_KEY']:
+            return
+        return redirect(url_for('login'))
+    except:
+        return redirect(url_for('login'))
+
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        try:
+            userInf = request.cookies.get("userInf")
+            userInf = json.loads(AES_INS.aesDecrypt(userInf))
+            username = userInf['username']
+            if username == app.config['LOGIN_KEY']:
+                return redirect(url_for('index'))
+            return render_template('login.html', msg="")
+        except:
+            return render_template('login.html', msg="")
+    else:
+        username = request.form.get("password")
+        if username == app.config['LOGIN_KEY']:
+            ret = {"username": username, "time": time.time()}
+            resp = make_response(redirect(url_for('index')))
+            resp.set_cookie('userInf', AES_INS.aesEncrypt(
+                json.dumps(ret)), expires=time.time()+60*60*24*180)
+            return resp
+        else:
+            return render_template('login.html', msg="Password error. ")
 
 
 @socketio.on('connect')
