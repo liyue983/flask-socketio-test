@@ -293,3 +293,22 @@ function htmlEncode(html) {
   temp = null;
   return output;
 }
+
+changeHeight();
+window.onresize = function(){
+  changeHeight();
+};
+
+function changeHeight(){
+  var docHeight = innerHeight;
+  if(docHeight <= 665){
+      $('.chat-messages').css({
+        "max-height":(docHeight-165)+"px"
+      });
+  }
+  else{
+    $('.chat-messages').css({
+      "max-height":"500px"
+    });
+  }
+}
