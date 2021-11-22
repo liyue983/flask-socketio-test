@@ -301,9 +301,15 @@ window.onresize = function(){
 
 function changeHeight(){
   var docHeight = innerHeight;
-  if(docHeight <= 665){
+  var normalHeight = 0;
+  if(innerWidth<700){
+    normalHeight = 665;
+  }else{
+    normalHeight = 725;
+  }
+  if(docHeight <= normalHeight){
       $('.chat-messages').css({
-        "max-height":(docHeight-165)+"px"
+        "max-height":(docHeight-(normalHeight-500))+"px"
       });
   }
   else{
