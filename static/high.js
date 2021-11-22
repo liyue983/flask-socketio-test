@@ -116,7 +116,9 @@ $(".chat-messages").click(function (e) {
 const socket = io();
 
 // Join chatroom
-socket.emit("joinRoom", { username, room });
+socket.on("connect",()=>{
+  socket.emit("joinRoom", { username, room });
+})
 
 // Get room and users
 socket.on("roomUsers", ({ room, users }) => {

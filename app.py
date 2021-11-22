@@ -27,6 +27,7 @@ app.config['PUBLIC_PATH'] = [
 app.config['LOGIN_KEY'] = os.environ.get("LOGIN_KEY", "")
 AES_INS = AES_Util.AESUtil(os.environ.get("COOKIE_SKEY", ""))
 socketio = SocketIO(app, async_mode=async_mode)
+board_users = {}
 
 
 def getNextSequence(seq_name='clipseq'):
@@ -209,8 +210,24 @@ def connect():
          'user': 'SERVER', 'time': time.time()}, 'count': 0})
 
 
+@socketio.on('joinRoom')
+def join_room(message):
+    print(message, request.sid)
+    board_users[request.sid] = message['username']
+    users = [{'username': board_users[x]} for x in board_users]
+    socketio.emit("roomUsers", {"users": users, "room": "code board"})
+    socketio.emit('my_response',
+                  {'data': {"msg": message['username']+" join the board.",
+                            "time": time.time(), "user": "SERVER"}},
+                  broadcast=True)
+
+
 @socketio.on('disconnect')
 def test_disconnect():
+    if request.sid in board_users:
+        board_users.pop(request.sid)
+    users = [{'username': board_users[x]} for x in board_users]
+    socketio.emit("roomUsers", {"users": users, "room": "code board"})
     print('Client disconnected', request.sid)
 
 
